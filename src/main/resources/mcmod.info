@@ -1,0 +1,16 @@
+[
+  {
+    "modid": "chatmod",
+    "name": "ChatMod",
+    "description": "A mod to mute players based on banned words and spamming on your server and save the screenshot as a proof in the Mutes folder in the minecraft directory.",
+    "version": "${version}",
+    "mcversion": "${mcversion}",
+    "url": "",
+    "updateUrl": "",
+    "authorList": ["Arhenniuss"],
+    "credits": "",
+    "logoFile": "Logo.png",
+    "screenshots": [],
+    "dependencies": []
+  }
+]

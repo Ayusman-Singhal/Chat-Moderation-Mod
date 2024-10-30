@@ -1,0 +1,68 @@
+private void checkForSpam(Minecraft mc, String senderName, String messageContent) {
+            if (senderName.equals("UnknownPlayer")) {
+                System.out.println("Skipping spam check for UnknownPlayer");
+                return;
+            }
+
+            if (mc.thePlayer != null && 
+                    !mc.thePlayer.getName().equals(senderName) && 
+                    isValidPlayerName(senderName) && 
+                    !senderName.equals("Profile") &&
+                    !senderName.equals("Kit") &&
+                    !senderName.equals("https") &&
+                    !senderName.equals("friend") &&
+                    !senderName.equals("Staff") &&
+                    !senderName.startsWith("EXCLUDED_")) {
+
+                long currentTime = System.currentTimeMillis();
+
+                if (!chatMessageMap.containsKey(senderName)) {
+                    chatMessageMap.put(senderName, new ArrayList<>());
+                }
+
+                List<MessageEntry> messages = chatMessageMap.get(senderName);
+                messages.add(new MessageEntry(messageContent.toLowerCase(), currentTime));
+
+                messages.removeIf(entry -> (currentTime - entry.timestamp) > SPAM_TIME_WINDOW);
+
+                Map<String, Integer> messageCount = new HashMap<>();
+                for (MessageEntry entry : messages) {
+                    messageCount.put(entry.content, messageCount.getOrDefault(entry.content, 0) + 1);
+                    if (messageCount.get(entry.content) >= SPAM_THRESHOLD) {
+                        System.out.println("Spam detected from " + senderName + ": " + entry.content + " (Count: " + messageCount.get(entry.content) + ")");
+                        handleInappropriateMessage(mc, senderName, "/mute " + senderName + " 1H mci");
+                        chatMessageMap.remove(senderName);
+                        return;
+                    }
+                }
+                
+                System.out.println("Message from " + senderName + " processed. Current count: " + messages.size());
+            }
+        }
+        
+        
+        private String extractMessageContent(String message) {
+            if (message.startsWith("<") || message.startsWith("[")) {
+                int prefixEndIndex = message.indexOf("] ");
+                int startIndex;
+
+                if (prefixEndIndex != -1) {
+                    startIndex = message.indexOf(": ", prefixEndIndex + 2);
+                    if (startIndex != -1) {
+                        return message.substring(startIndex + 2);
+                    }
+                } else {
+                    startIndex = message.indexOf("> ");
+                    if (startIndex != -1) {
+                        return message.substring(startIndex + 2);
+                    }
+                }
+            }
+            if (message.contains(":")) {
+                int startIndex = message.indexOf(": ");
+                if (startIndex != -1) {
+                    return message.substring(startIndex + 2);
+                }
+            }
+            return message;
+        }
